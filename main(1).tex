@@ -1,0 +1,130 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usepackage{amsmath}
+
+\title{Singular Value Decomposition}
+\subtitle{Directed Reading Program 2025/26}
+\author{Alexandros Phardis}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Presentation Outline}
+    \begin{block}{Legend of Topics}
+        \tableofcontents[hideallsubsections]
+            \vspace{0.5cm}
+            \begin{itemize}
+        \item \textbf{History:} From 19th-century theory to 20th-century computing.
+        \item \textbf{Theory:} Definition and Method based on Lecture Notes.
+        \item \textbf{Applications:} Numerical applications from Dahlquist \& Björck.
+    \end{itemize}
+    \end{block}
+    
+
+    
+
+\end{frame}
+
+\begin{frame}{History of the SVD}
+    \begin{itemize}
+        \item \textbf{Theoretical Origins:} The SVD was initially published independently by Eugenio Beltrami in 1873 and Camille Jordan in 1874.
+        \item \textbf{The Computational Gap:} Despite its theoretical beauty, it was not widely used in numerical computing for almost a century.
+        \item \textbf{The Breakthrough:} In the early 1970s, Golub and Reinsch published a numerically stable algorithm to compute the SVD, officially turning it into the "Swiss Army Knife" of numerical linear algebra.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Definition of the SVD}
+    \begin{theorem}[SVD for Matrices]
+    Every matrix $A \in M_{m \times n}(\mathbb{F})$ can be written in the form:
+    \[ A = U_2 D U_1^{-1} \]
+    where:
+    \begin{itemize}
+        \item $U_1 \in M_{n \times n}(\mathbb{F})$ and $U_2 \in M_{m \times m}(\mathbb{F})$ are unitary matrices.
+        \item $D \in M_{m \times n}$ has strictly positive $(i, i)$ entries for $i = 1, \dots, k$ (the singular values $s_i$), and all other entries equal to zero.
+    \end{itemize}
+    \end{theorem}
+    \vspace{0.2cm}
+    \textit{Note:} Because $U_1$ is unitary, $U_1^{-1} = U_1^*$. There is no complex inverse calculation required!
+\end{frame}
+
+\begin{frame}{The Method}
+    \begin{block}{How to Calculate the SVD}
+        \begin{enumerate}
+            \item \textbf{Find the input basis:} Find an orthonormal (ON) basis of eigenvectors $v_1, \dots, v_n$ of $A^*A$. The eigenvalues are $s_i^2$, where $s_i$ are the singular values. Group the $k$ strictly positive ones first.
+            \item \textbf{Find the output basis:} For the positive singular values, calculate $w_i = \frac{1}{s_i} A v_i$ for $i=1, \dots, k$.
+            \item \textbf{Complete the matrices:} Extend the $w_i$ to an ON basis of $\mathbb{F}^m$. Put the $v_i$ vectors as the columns of $U_1$ and the $w_i$ vectors as the columns of $U_2$. 
+        \end{enumerate}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Walkthrough}
+    \begin{example}
+    Let $A = \begin{pmatrix} 0 & 1 \\ 0 & 1 \\ 1 & 0 \end{pmatrix}$. First, compute $A^*A = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}$.
+    
+    \vspace{0.2cm}
+    \textbf{Step 1:} The singular values are $1, \sqrt{2}$. The eigenvectors are $v_1 = e_1$, $v_2 = e_2$.
+    
+    \vspace{0.2cm}
+    \textbf{Step 2:} Compute $w_i = \frac{1}{s_i} A v_i$:
+    \[ w_1 = A v_1 = \begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix}, \quad w_2 = \frac{1}{\sqrt{2}} A v_2 = \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \\ 0 \end{pmatrix} \]
+    
+    \textbf{Step 3:} Complete the ON basis for $\mathbb{R}^3$ with $w_3 = \begin{pmatrix} 1/\sqrt{2} \\ -1/\sqrt{2} \\ 0 \end{pmatrix}$.
+    \end{example}
+\end{frame}
+
+\begin{frame}{Walkthrough (Continued)}
+\begin{example}[Continued]
+    By arranging our vectors as columns, we get the final SVD matrices:
+    
+    \[ U_2 = \begin{pmatrix} 0 & 1/\sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} & -1/\sqrt{2} \\ 1 & 0 & 0 \end{pmatrix} \]
+    
+    \[ D = \begin{pmatrix} 1 & 0 \\ 0 & \sqrt{2} \\ 0 & 0 \end{pmatrix} \]
+    
+    \[ U_1 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} \]
+    
+    You can easily verify that $A = U_2 D U_1^{-1}$.
+    \end{example}
+\end{frame}
+
+\begin{frame}{Application: Determining Numerical Rank}
+    \begin{itemize}
+        \item \textbf{The Problem:} Traditional methods like Gaussian elimination fail in computer programs. A computer might calculate $0.0000000000000001$ instead of $0$, making it impossible to easily find the true rank of a matrix.
+        \item \textbf{The SVD Solution:} SVD is immune to this ambiguity. 
+        \item \textbf{Numerical $\delta$-rank:} We simply choose an error tolerance level, $\delta$ (like the computer's roundoff limit). The numerical rank is exactly the number of singular values strictly greater than $\delta$.
+        \item Tiny singular values are just treated as numerical noise and ignored!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Highlight Application: The Pseudoinverse}
+    \begin{itemize}
+        \item \textbf{The Problem:} How do we solve $Ax = b$ when there are more equations than unknowns (overdetermined), or too few (underdetermined)?
+        \item \textbf{The Goal:} We want the "least squares" solution: the vector $x$ that minimizes the error $||b - Ax||_2$, while keeping $x$ as small as possible.
+        \item \textbf{The SVD Solution:} We use the Moore-Penrose pseudoinverse, calculated by taking the inverse of the non-zero singular values: 
+        \[ A^\dagger = U_1 D^\dagger U_2^* \]
+        \item The most robust, optimal solution is perfectly defined as $x = A^\dagger b$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{More Applciations}
+\begin{itemize}
+\item image compression
+\item facial recognition (eigenfaces)
+\item recommendation systems (e.g., Netflix)
+\item signal processing
+\item and solving ill-conditioned linear systems
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\centering
+\begin{Huge}
+\phantom{h}\\
+THANK YOU!
+\end{Huge}
+\end{frame}
+
+\end{document}
