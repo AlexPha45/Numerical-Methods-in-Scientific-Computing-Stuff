@@ -1,2 +1,2 @@
-# Numerical-Methods-in-Scientific-Computing-Stuff
+# Numerical-Methods-in-Scientific-Computing
 Some presentations from this directed reading program
